@@ -2,15 +2,37 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using Shopping.Client.Models;
-namespace Shopping.Client.Data
+using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
+using Shopping.API.Models;
+namespace Shopping.API.Data
 {
-    public static class ProductContext
+    public class ProductContext
     {
-        public static readonly List<Product> Products = new List<Product>
+        
+        public ProductContext(IConfiguration configuration)
         {
-            new Product()
+            var client = new MongoDB.Driver.MongoClient(configuration["DatabaseSettings:ConnectionString"]);
+            var database = client.GetDatabase(configuration["DatabaseSettings:DatabaseName"]);
+
+            Products = database.GetCollection<Product>(configuration["DatabaseSettings:CollectionName"]);
+            SeedData(Products);
+        }
+        public IMongoCollection<Product> Products { get; private set; }
+
+        private static void SeedData(IMongoCollection<Product> productCollection)
+        {
+            bool productExists = productCollection.Find(p => true).Any();
+            if (!productExists)
+            {
+                productCollection.InsertManyAsync(GetPreconfiguredProducts());
+            }
+        }
+        private static IEnumerable<Product> GetPreconfiguredProducts()
+        {
+            return new List<Product>()
+            {
+                new Product()
                 {
                     Name = "IPhone X",
                     Description = "This phone is the company's biggest change to its flagship smartphone in years. It includes a borderless.",
@@ -58,6 +80,8 @@ namespace Shopping.Client.Data
                     Price = 240.00M,
                     Category = "Home Kitchen"
                 }
-        };
+            };
+        }
+
     }
 }

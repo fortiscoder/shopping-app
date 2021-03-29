@@ -7,22 +7,29 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-using Shopping.Client.Data;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace Shopping.Client.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly HttpClient _client;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IHttpClientFactory httpClientFactory, ILogger<HomeController> logger)
         {
             _logger = logger;
+            _client = httpClientFactory.CreateClient("ShoppingAPIClient");
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(ProductContext.Products) ;
+            var response = await _client.GetAsync("/product");
+            var content = await response.Content.ReadAsStringAsync();
+            var productList = JsonConvert.DeserializeObject<IEnumerable<Product>>(content);
+
+            return View(productList) ;
         }
 
         public IActionResult Privacy()
