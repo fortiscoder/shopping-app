@@ -11,7 +11,7 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: 'd6c024d2-bf8d-48a1-b065-e7cccd8b7461'
-  imageRepository: 'fortiscodershoppingapp'
+  imageRepository: 'shoppingapi'
   containerRegistry: 'shoppingacrsw.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Shopping/Shopping.API/Dockerfile'
   tag: '$(Build.BuildId)'
